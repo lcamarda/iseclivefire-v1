@@ -1,0 +1,22 @@
+apiVersion: security.antrea.tanzu.vmware.com/v1alpha1
+kind: ClusterNetworkPolicy
+metadata:
+  name: block-outbound-traffic
+spec:
+    priority: 5
+    tier: securityops
+    appliedTo:
+      - namespaceSelector:
+          matchLabels:
+            env: prd
+      - namespaceSelector:
+          matchLabels:
+            env: dev
+    egress:
+      - action: Allow
+        to:
+          - ipBlock:
+              cidr: 10.96.0.0/12
+          - ipBlock:
+              cidr: 10.254.0.0/16
+      - action: Drop
