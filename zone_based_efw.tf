@@ -31,6 +31,19 @@ resource "nsxt_policy_group" "dmz" {
   }
 }
 
+resource "nsxt_policy_group" "internal" {
+  nsx_id       = "INTERNAL"
+  display_name = "INTERNAL"
+  criteria {
+    condition {
+      member_type = "Segment"
+      key         = "Tag"
+      operator    = "EQUALS"
+      value       = "zone|internal"
+    }
+  }
+}
+
 resource "nsxt_policy_service" "couchdb" {
   display_name = "couchdb"
 
