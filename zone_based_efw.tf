@@ -80,12 +80,21 @@ resource "nsxt_policy_gateway_policy" "InternalZone" {
     scope              = [data.nsxt_policy_tier1_gateway.t1-internal.path]
   }
 
+
+  rule {
+    display_name       = "Allow Outbound"
+    source_groups      = [nsxt_policy_group.internal.path]
+    action             = "ALLOW"
+    logged             = true
+    scope              = [data.nsxt_policy_tier1_gateway.t1-internal.path]
+  }
+
  rule {
     display_name       = "Block the Rest Inbound"
     action             = "REJECT"
     logged             = true
-    destination_groups = [nsxt_policy_group.internal.path]
     scope              = [data.nsxt_policy_tier1_gateway.t1-internal.path]
   }
+
 
 }
