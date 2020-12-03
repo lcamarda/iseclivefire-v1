@@ -83,3 +83,28 @@ data "nsxt_policy_vm" "couchdb-prd" {
   display_name = "couchdb-prd"
 }
 
+resource "nsxt_policy_security_policy" "env-isolation" {
+  display_name = "Environment Isolation"
+  description  = "Block Traffic Between DEV and PROD"
+  category     = "Environment"
+  locked       = false
+  stateful     = true
+  tcp_strict   = true
+  scope        = [nsxt_policy_group.PRD.path,nsxt_policy_group.DEV.path]
+
+  rule {
+    display_name       = "block dev to prod"
+    destination_groups = [nsxt_policy_group.PRD.path]
+    source_groups      = [nsxt_policy_group.DEV.path]
+    action             = "DROP"
+    logged             = true
+  }
+
+  rule {
+    display_name       = "block prod to dev"
+    destination_groups = [nsxt_policy_group.DEV.path]
+    source_groups      = [nsxt_policy_group.PRD.path]
+    action             = "DROP"
+    logged             = true
+  }
+}
