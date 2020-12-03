@@ -61,7 +61,7 @@ resource "nsxt_policy_gateway_policy" "InternalZone" {
   locked          = false
   sequence_number = 1
   stateful        = true
-  tcp_strict      = false
+  tcp_strict      = true
 
   rule {
     display_name       = "Allow Management"
