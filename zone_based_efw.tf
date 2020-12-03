@@ -84,7 +84,7 @@ resource "nsxt_policy_gateway_policy" "InternalZone" {
     display_name       = "Block the Rest Inbound"
     action             = "REJECT"
     logged             = true
-    direction          = "IN"
+    destination_groups = [nsxt_policy_group.internal.path]
     scope              = [data.nsxt_policy_tier1_gateway.t1-internal.path]
   }
 
