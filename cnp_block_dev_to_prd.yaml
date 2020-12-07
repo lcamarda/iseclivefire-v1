@@ -1,0 +1,17 @@
+apiVersion: security.antrea.tanzu.vmware.com/v1alpha1
+kind: ClusterNetworkPolicy
+metadata:
+  name: block-dev-to-prd
+spec:
+    priority: 5
+    tier: SecurityOps
+    appliedTo:
+      - namespaceSelector:
+          matchLabels:
+            env: prd
+    ingress:
+      - action: Drop
+        from:
+           - namespaceSelector:
+               matchLabels:
+                 env: dev
