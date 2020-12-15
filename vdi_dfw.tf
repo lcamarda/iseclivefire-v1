@@ -33,6 +33,17 @@ resource "nsxt_policy_group" "VDI" {
   }
 }
 
+resource "nsxt_policy_service" "vdi_ssl" {
+  description  = "L4 ports service provisioned by Terraform"
+  display_name = "vdi_ssl_ports"
+
+  l4_port_set_entry {
+    display_name      = "browsing_via_ssl"
+    protocol          = "TCP"
+    destination_ports = ["443","1010","1011","1012"]
+  }
+}
+
 data "nsxt_policy_context_profile" "ACTIVDIR" {
   display_name = "ACTIVDIR"
 }
@@ -49,15 +60,18 @@ data "nsxt_policy_context_profile" "SSL" {
   display_name = "SSL"
 }
 
+data "nsxt_policy_context_profile" "DCERPC" {
+  display_name = "DCERPC"
+}
 
-resource "nsxt_policy_context_profile" "SSLTLSV10" {
-  display_name = "SSL_TLS_V10"
+resource "nsxt_policy_context_profile" "SSLTLSV10V11" {
+  display_name = "SSL_TLS_V10_V11"
   description  = "Terraform provisioned ContextProfile"
   app_id {
-    description = "ssl tls v1.0"
+    description = "ssl tls v1.0, v1.1"
     value       = ["SSL"]
     sub_attribute {
-      tls_version = ["TLS_V10"]
+      tls_version = ["TLS_V10","TLS_V11"]
     }
   }
 }
@@ -83,6 +97,18 @@ data "nsxt_policy_service" "http" {
 
 data "nsxt_policy_service" "https" {
   display_name = "HTTPS"
+}
+
+data "nsxt_policy_service" "ldap" {
+  display_name = "LDAP"
+}
+
+data "nsxt_policy_service" "MS_RPC_TCP" {
+  display_name = "MS_RPC_TCP"
+}
+
+data "nsxt_policy_service" "MS_RPC_UDP" {
+  display_name = "MS_RPC_UDP"
 }
 
 
@@ -114,17 +140,39 @@ resource "nsxt_policy_security_policy" "vdi" {
   }
 
   rule {
+    display_name       = "Allow MS_RPC Traffic to/from domain controller L7"
+    destination_groups = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
+    source_groups      = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
+    action             = "ALLOW"
+    logged             = true
+    profiles           = [data.nsxt_policy_context_profile.DCERPC.path]
+    services           = [data.nsxt_policy_service.MS_RPC_TCP.path, data.nsxt_policy_service.MS_RPC_UDP.path]
+    log_label          = "msrpc_l7"
+  }
+
+  rule {
+    display_name       = "Allow LDAP Traffic to/from domain controller L7"
+    destination_groups = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
+    source_groups      = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
+    action             = "ALLOW"
+    logged             = true
+    profiles           = [data.nsxt_policy_context_profile.LDAP.path]
+    services           = [data.nsxt_policy_service.ldap.path]
+    log_label          = "ldap_l7"
+  }
+
+  rule {
     display_name       = "Allow AD Traffic to/from domain controlleri L7"
     destination_groups = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
     source_groups      = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
     action             = "ALLOW"
     logged             = true
-    profiles           = [data.nsxt_policy_context_profile.ACTIVDIR.path,data.nsxt_policy_context_profile.LDAP.path]
+    profiles           = [data.nsxt_policy_context_profile.ACTIVDIR.path]
     log_label          = "activdir_l7"
   }
 
   rule {
-    display_name       = "Allow AD Traffic to/from domain controller L4"
+    display_name       = "Allow AD + LDAP Traffic to/from domain controller L4"
     destination_groups = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
     source_groups      = [nsxt_policy_group.VDI.path, data.nsxt_policy_group.mgmt.path]
     action             = "ALLOW"
@@ -134,12 +182,14 @@ resource "nsxt_policy_security_policy" "vdi" {
   }
 
   rule {
-    display_name       = "Block SSL TLS v1.0"
+    display_name       = "Block SSL TLS v1.0 and v1.1"
     source_groups      = [nsxt_policy_group.VDI.path]
     action             = "REJECT"
     logged             = true
-    profiles           = [nsxt_policy_context_profile.SSLTLSV10.path]
-    log_label          = "TLS10"
+    profiles           = [nsxt_policy_context_profile.SSLTLSV10V11.path]
+    log_label          = "TLS10_11"
+    services           = [nsxt_policy_service.vdi_ssl.path]
+
   }
 
   rule {
@@ -149,6 +199,7 @@ resource "nsxt_policy_security_policy" "vdi" {
     logged             = true
     profiles           = [data.nsxt_policy_context_profile.SSL.path]
     log_label          = "TLS-NEW"
+    services           = [nsxt_policy_service.vdi_ssl.path]
   }
 
   rule {
@@ -165,3 +216,4 @@ resource "nsxt_policy_security_policy" "vdi" {
     logged             = true
   }
 }
+
