@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    nsxt = {
+      source = "vmware/nsxt"
+      version = "3.1.0"
+    }
+  }
+}
+
 provider "nsxt" {
   host                  = "192.168.110.15"
   username              = "admin"
