@@ -22,7 +22,7 @@
                            "IdsRule":{
                               "action":"DETECT",
                               "ids_profiles":[
-                                 "/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"
+                                 "/infra/settings/firewall/security/intrusion-services/profiles/IDS-PROFILE"
                               ],
                               "resource_type":"IdsRule",
                               "id":"1",
@@ -69,7 +69,7 @@
                            "IdsRule":{
                               "action":"DETECT",
                               "ids_profiles":[
-                                 "/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"
+                                 "/infra/settings/firewall/security/intrusion-services/profiles/IDS-PROFILE"
                               ],
                               "resource_type":"IdsRule",
                               "id":"IDS_3",
@@ -116,7 +116,7 @@
                            "IdsRule":{
                               "action":"DETECT",
                               "ids_profiles":[
-                                 "/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"
+                                 "/infra/settings/firewall/security/intrusion-services/profiles/IDS-PROFILE"
                               ],
                               "resource_type":"IdsRule",
                               "id":"New_Rule",
