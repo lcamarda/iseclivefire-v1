@@ -31,6 +31,17 @@ resource "nsxt_policy_group" "VDI" {
       value       = "zone|vdi"
     }
   }
+  conjunction {
+    operator = "OR"
+  }
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "VirtualMachine"
+      operator    = "EQUALS"
+      value       = "win10-01a"
+    }
+  }
 }
 
 resource "nsxt_policy_service" "vdi_ssl" {
